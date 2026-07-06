@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>GitJuked</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GitJuked — minimal cyber-green audio player by cxmx-dev">
+  <link rel="icon" href="data:,">
+  <style>
+    html, body { margin:0; padding:0; overflow:hidden; height:100%; background:#000; color:#ccc; font-family:'Segoe UI',Arial,sans-serif; }
+    #viz {
+      position:fixed; inset:0; width:100%; height:100%;
+      z-index:0; pointer-events:none;
+    }
+    #hud {
+      position:fixed; bottom:12px; right:12px; background:rgba(10,10,10,0.88); padding:8px 12px;
+      border-radius:4px; border:1px solid #222; color:#00ffaa; font-size:13px;
+      box-shadow:0 0 8px rgba(0,255,170,0.12); transition:opacity 0.35s ease;
+      z-index:100; min-width:620px; -webkit-user-select:none; user-select:none; opacity:0; pointer-events:none;
+    }
+    #hud.active { opacity:1; pointer-events:auto; }
+    button { background:#111; border:1px solid #333; color:#00ffaa; padding:6px 10px; margin:0 2px; font-size:15px; cursor:pointer; transition:all 0.2s; }
+    button:hover { background:#1a1a1a; border-color:#00ffaa; color:#fff; }
+    select { background:#111; border:1px solid #333; color:#00ffaa; padding:5px 8px; font-size:13px; }
+    input[type="range"] { accent-color:#00ffaa; background:#222; height:4px; border-radius:2px; }
+    input[type="range"]#volume { width:90px; }
+    input[type="range"]#timeline { flex:1; }
+    .controls { display:flex; align-items:center; gap:6px; }
+    #trackInfo { margin-left:12px; min-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:13px; }
+    .range-controls { margin-top:8px; display:flex; align-items:center; gap:12px; }
+    @media (max-width:680px) {
+      #hud { min-width:unset; left:8px; right:8px; bottom:8px; }
+      #trackInfo { min-width:120px; }
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;">
+
+  <canvas id="viz" aria-hidden="true"></canvas>
+
+  <div id="hud">
+    <div class="controls">
+      <button id="prev">⏮</button>
+      <button id="play">▶</button>
+      <button id="next">⏭</button>
+      <button id="shuffle">🔀</button>
+      <button id="load">Browse Folder</button>
+      <select id="playlist" aria-label="Playlist"></select>
+      <div id="trackInfo">No track loaded</div>
+    </div>
+    <div class="range-controls">
+      <input type="range" id="volume" min="0" max="1" step="0.01" value="1" aria-label="Volume">
+      <input type="range" id="timeline" min="0" max="100" value="0" aria-label="Progress">
+    </div>
+  </div>
+
+  <audio id="audio"></audio>
+
+  <script src="scripts/playlist-helpers.js"></script>
+  <script>
+    const audio = document.getElementById('audio');
+    const hud = document.getElementById('hud');
+    const prevBtn = document.getElementById('prev');
+    const playBtn = document.getElementById('play');
+    const nextBtn = document.getElementById('next');
+    const shuffleBtn = document.getElementById('shuffle');
+    const loadBtn = document.getElementById('load');
+    const playlistSelect = document.getElementById('playlist');
+    const trackInfo = document.getElementById('trackInfo');
+    const volumeSlider = document.getElementById('volume');
+    const timelineSlider = document.getElementById('timeline');
+
+    const audioCtx = new AudioContext();
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    audioCtx.createMediaElementSource(audio).connect(analyser).connect(audioCtx.destination);
+
+    let playlist = [];
+    let currentIndex = 0;
+    let isPlaying = false;
+    let hideTimer = null;
+    let currentObjectURL = null;
+    const HIDE_DELAY = 2200;
+    const IS_HOSTED = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    const AUDIO_EXT = /\.(mp3|wav|ogg|m4a|aac|flac)$/i;
+
+    function revokeCurrentURL() {
+      if (currentObjectURL) {
+        URL.revokeObjectURL(currentObjectURL);
+        currentObjectURL = null;
+      }
+    }
+
+    function showHUD() {
+      clearTimeout(hideTimer);
+      hud.classList.add('active');
+      hideTimer = setTimeout(function () { hud.classList.remove('active'); }, HIDE_DELAY);
+    }
+
+    async function loadStaticPlaylist() {
+      const res = await fetch('tracks.json', { cache: 'no-store' });
+      if (!res.ok) throw new Error('tracks.json missing');
+      const data = await res.json();
+      return GitJukedPlaylist.normalizeManifest(data);
+    }
+
+    function populatePlaylist(tracks) {
+      playlist = tracks;
+      playlistSelect.innerHTML = '';
+      GitJukedPlaylist.buildSelectOptions(tracks).forEach(function (opt) {
+        playlistSelect.appendChild(new Option(opt.label, opt.value));
+      });
+      if (tracks.length) {
+        currentIndex = 0;
+        loadTrack(0);
+        showHUD();
+      }
+    }
+
+    async function initHosted() {
+      try {
+        const tracks = await loadStaticPlaylist();
+        populatePlaylist(tracks);
+        trackInfo.textContent = tracks.length ? 'GitJuked · ' + tracks.length + ' track(s)' : 'No tracks in manifest';
+      } catch (e) {
+        trackInfo.textContent = 'Hosted mode — add tracks.json + audio/';
+        console.warn(e);
+      }
+    }
+
+    function loadTrack(index) {
+      if (!playlist[index]) return;
+      const track = playlist[index];
+      currentIndex = index;
+      trackInfo.textContent = 'Now playing: ' + track.name;
+      playlistSelect.value = index;
+
+      revokeCurrentURL();
+
+      if (track.src) {
+        audio.src = track.src;
+        audio.load();
+        if (isPlaying) {
+          audioCtx.resume().then(function () { audio.play().catch(function () {}); });
+        }
+        return;
+      }
+
+      if (track.handle) {
+        track.handle.getFile().then(function (file) {
+          currentObjectURL = URL.createObjectURL(file);
+          audio.src = currentObjectURL;
+          audio.load();
+          if (isPlaying) {
+            audioCtx.resume().then(function () { audio.play().catch(function () {}); });
+          }
+        });
+      } else if (track.file) {
+        currentObjectURL = URL.createObjectURL(track.file);
+        audio.src = currentObjectURL;
+        audio.load();
+        if (isPlaying) {
+          audioCtx.resume().then(function () { audio.play().catch(function () {}); });
+        }
+      }
+    }
+
+    async function loadFolder() {
+      try {
+        const dirHandle = await window.showDirectoryPicker();
+        playlist = [];
+        playlistSelect.innerHTML = '';
+        let count = 1;
+        for await (const entry of dirHandle.entries()) {
+          const name = entry[0];
+          const handle = entry[1];
+          if (handle.kind === 'file' && AUDIO_EXT.test(name)) {
+            playlistSelect.appendChild(new Option('Track ' + count, playlist.length));
+            playlist.push({ name: 'Track ' + count, handle: handle });
+            count++;
+          }
+        }
+        if (playlist.length > 0) {
+          currentIndex = 0;
+          loadTrack(0);
+          showHUD();
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') alert('Folder picker unavailable.');
+      }
+    }
+
+    loadBtn.onclick = loadFolder;
+
+    playBtn.onclick = async function () {
+      await audioCtx.resume();
+      if (isPlaying) {
+        audio.pause();
+        playBtn.textContent = '▶';
+      } else {
+        try {
+          await audio.play();
+          playBtn.textContent = '⏸';
+        } catch (err) {
+          console.error('Audio play failed:', err);
+        }
+      }
+      isPlaying = !isPlaying;
+      showHUD();
+    };
+
+    prevBtn.onclick = function () {
+      currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+      loadTrack(currentIndex);
+      showHUD();
+    };
+    nextBtn.onclick = function () {
+      currentIndex = (currentIndex + 1) % playlist.length;
+      loadTrack(currentIndex);
+      showHUD();
+    };
+
+    shuffleBtn.onclick = function () {
+      if (playlist.length < 2) return;
+      for (let i = playlist.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = playlist[i];
+        playlist[i] = playlist[j];
+        playlist[j] = tmp;
+      }
+      playlistSelect.innerHTML = '';
+      playlist.forEach(function (t, i) {
+        playlistSelect.appendChild(new Option(t.name, i));
+      });
+      currentIndex = 0;
+      loadTrack(0);
+      showHUD();
+    };
+
+    playlistSelect.onchange = function (e) {
+      currentIndex = +e.target.value;
+      loadTrack(currentIndex);
+      showHUD();
+    };
+
+    audio.onended = function () { nextBtn.click(); };
+    volumeSlider.oninput = function () { audio.volume = volumeSlider.value; };
+    audio.ontimeupdate = function () {
+      if (audio.duration) timelineSlider.value = (audio.currentTime / audio.duration) * 100;
+    };
+    timelineSlider.oninput = function () {
+      if (audio.duration) audio.currentTime = (timelineSlider.value / 100) * audio.duration;
+    };
+
+    function resetActivity() { showHUD(); }
+    document.addEventListener('mousemove', resetActivity);
+    document.addEventListener('click', resetActivity);
+    document.addEventListener('keydown', function (e) {
+      resetActivity();
+      if (e.code === 'Space') { e.preventDefault(); playBtn.click(); }
+      else if (e.code === 'ArrowRight') nextBtn.click();
+      else if (e.code === 'ArrowLeft') prevBtn.click();
+      else if (e.code === 'KeyS') shuffleBtn.click();
+    });
+
+    window.addEventListener('beforeunload', revokeCurrentURL);
+
+    const viz = document.getElementById('viz');
+    const vizCtx = viz.getContext('2d');
+    const freqData = new Uint8Array(analyser.frequencyBinCount);
+
+    function resizeViz() {
+      viz.width = innerWidth;
+      viz.height = innerHeight;
+    }
+    addEventListener('resize', resizeViz);
+    resizeViz();
+
+    function drawViz() {
+      requestAnimationFrame(drawViz);
+      analyser.getByteFrequencyData(freqData);
+      const w = viz.width;
+      const h = viz.height;
+      vizCtx.fillStyle = 'rgba(0,0,0,0.15)';
+      vizCtx.fillRect(0, 0, w, h);
+      const barW = w / freqData.length;
+      for (let i = 0; i < freqData.length; i++) {
+        const barH = Math.max(1, (freqData[i] / 255) * h * 0.45);
+        vizCtx.fillStyle = 'rgba(0,255,170,' + (0.2 + freqData[i] / 512) + ')';
+        vizCtx.fillRect(i * barW, h - barH, barW - 1, barH);
+      }
+    }
+    drawViz();
+
+    audio.volume = 1;
+    showHUD();
+    if (IS_HOSTED) initHosted();
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "gitjuked",
+  "private": true,
+  "scripts": {
+    "test": "node tests/playlist-helpers.test.js",
+    "test:launch": "node tests/launch-check.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}
