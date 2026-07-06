@@ -9,7 +9,7 @@ source: ANON-AUDIO-PLAYER v.01 (single-file HTML + File System Access API)
 seed_track: audio/01_-_gitjuke_-_cxmx.wav
 stack: vanilla HTML/CSS/JS — zero build required for Day-0
 created: 2026-07-06
-status: ready-to-implement
+status: live — Pages deployed
 ---
 
 # GitJuked — Implementation Plan
@@ -69,6 +69,18 @@ git push -u origin main
 ```
 
 Enable Pages manually: **Settings → Pages → Build from branch → `main` / `(root)` → Save**.
+
+### Repo visibility vs. public player link
+
+See [docs/repo-privacy.md](docs/repo-privacy.md) for the full table. Summary:
+
+| Setup | `cxmx-dev.github.io/GitJuked/` | `github.com/cxmx-dev/GitJuked` browsable? |
+|-------|-------------------------------|---------------------------------------------|
+| Public repo (Free, **current**) | Works | Yes |
+| Private repo + **GitHub Pro** | Works (Pages stays public) | No (for strangers) |
+| Private repo + **Free** | **Breaks** | Private |
+
+**Recommended if you want listen-only sharing:** upgrade to Pro, set repo private, keep Pages public. On Free, keep repo public and share only the Pages URL.
 
 ---
 
@@ -293,22 +305,27 @@ Write-Host "tracks.json updated ($($tracks.Count) tracks)"
 
 `tracks.json` fetched with `cache: 'no-store'` so new tracks appear immediately after Pages rebuild. Audio files cache normally (good for repeat visits).
 
+### Day-0+ workflow (`start.ps1`)
+
+```powershell
+.\scripts\start.ps1   # scan audio/ → tracks.json → git push if changed → local preview
+```
+
+Audio may live in subfolders (e.g. `audio/playlists/instrumentals/`); `gen-tracks.ps1` scans recursively.
+
 ---
 
 ## Add-Audio Workflow
 
 **How I add a new track in <60 seconds:**
 
-1. Drop `my-new-banger.wav` into `audio/` (GitHub web: **Add file → Upload files** drag to `audio/`)
-2. Run one line locally (or in CI later):
+1. Drop `my-new-banger.wav` into `audio/` (any subfolder OK)
+2. Run:
    ```powershell
-   .\scripts\gen-tracks.ps1
+   .\scripts\start.ps1
    ```
-3. Commit and push:
-   ```powershell
-   git add audio/ tracks.json && git commit -m "track: my-new-banger" && git push
-   ```
-4. Done — live at Pages URL within ~1–2 min. No HTML edits required.
+   Or manually: `.\scripts\gen-tracks.ps1` then `git add audio/ tracks.json && git commit -m "track: …" && git push`
+3. Done — live at Pages URL within ~1–2 min. No HTML edits required.
 
 **Replace a track:** Same filename in `audio/` → overwrite → push. Update title in `tracks.json` only if filename changed.
 

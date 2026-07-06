@@ -63,6 +63,27 @@ git commit -m "track: your-filename"
 git push
 ```
 
+## Sharing the player vs. hiding the repo
+
+**Share this link** (listeners only need this): https://cxmx-dev.github.io/GitJuked/
+
+| Goal | What to do |
+|------|------------|
+| Anyone can **listen** via the link | Already works — share the Pages URL only |
+| Hide **repo source** on GitHub | Needs **GitHub Pro** (~$4/mo) → make repo **private**, keep Pages **public** |
+| Stay on **Free** | Repo must stay **public** for Pages to work; share only the player link, not the repo URL |
+
+**Do not** set the repo to private on a Free account — `https://cxmx-dev.github.io/GitJuked/` will break.
+
+Full breakdown: [docs/repo-privacy.md](docs/repo-privacy.md)
+
 ## Stack
 
 Vanilla HTML / CSS / JS — no build step, no framework. See `PLAN.md` for architecture and iteration tickets.
+
+## Version History
+
+70626 4:03:09:49 CST
+
+- Documented repo privacy vs. public GitHub Pages (Free vs. Pro, split-repo and host-elsewhere options).
+- Linked `docs/repo-privacy.md`; run instructions remain at top of README.

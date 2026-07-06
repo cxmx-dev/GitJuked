@@ -91,3 +91,4 @@ Verify: open https://cxmx-dev.github.io/GitJuked/ — cyber-green HUD, visualize
 | `gh` not recognized | `winget install GitHub.cli` or use `.\scripts\auth-github.ps1` (full path wrapper) |
 | Browser shows 404 on Pages URL | Wait 1–3 min after `push-pages.ps1`; confirm Pages status in repo **Settings → Pages** |
 | `Not logged in` from `push-pages.ps1` | Re-run `.\scripts\auth-github.ps1` until Image #1 appears |
+| Want player public but repo hidden | [docs/repo-privacy.md](repo-privacy.md) — requires GitHub Pro; Free + private repo breaks Pages |

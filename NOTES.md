@@ -25,3 +25,9 @@ If `gh` is not recognized, use the full path:
 ```powershell
 & 'C:\Program Files\GitHub CLI\gh.exe' auth login -h github.com -p https -w
 ```
+
+## Privacy (player link vs. repo)
+
+- **Share:** https://cxmx-dev.github.io/GitJuked/ (listeners)
+- **Hide repo on GitHub:** GitHub Pro + private repo (Free + private = Pages breaks)
+- Details: [docs/repo-privacy.md](docs/repo-privacy.md) · README § Sharing the player vs. hiding the repo
