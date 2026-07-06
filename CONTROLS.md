@@ -11,4 +11,4 @@ Click **▶** once to start audio (browser requirement).
 | A | Open / close Audio library |
 | Esc | Close Audio library |
 
-Move the mouse to show the HUD (volume + progress sliders). **Audio** button or track info opens nested folders and tracks from `tracks.json`. Click **\*** beside a track to download it to your device. Tap outside or press **Esc** to close.
+Move the mouse to show the HUD (volume + progress sliders). Yellow **\*** on the HUD downloads the current track; **\*** in the Audio drawer downloads that track. **Audio** button or track info opens the library from `tracks.json`. Tap outside or press **Esc** to close.
