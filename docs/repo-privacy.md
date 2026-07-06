@@ -68,3 +68,15 @@ Netlify, Cloudflare Pages, etc. can build from a private Git remote while servin
 | `https://github.com/cxmx-dev/GitJuked` | Repo page (only if repo is public or they have access) |
 
 Sharing **only** the `.github.io` link is enough for listen-only use. Hiding the repo requires **Pro + private repo** (Option A) or a split/deploy setup (Option C).
+
+---
+
+## Public content policy (tracked files)
+
+To avoid exposing machine-specific details in the public repo:
+
+- Docs use `cd GitJuked` — not local drive letters or user profile paths
+- Auth walkthrough redacts one-time device codes (`XXXX-XXXX`)
+- `NOTES.md`, `README.md`, and `PLAN.md` describe workflow only — no session artifacts
+
+**Still public by nature:** GitHub username in URLs, audio filenames in `tracks.json`, and full source while repo stays public on Free.

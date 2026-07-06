@@ -8,7 +8,8 @@ source: ANON-AUDIO-PLAYER v.01 (single-file HTML + File System Access API)
 seed_track: audio/playlists/instrumentals/
 stack: vanilla HTML/CSS/JS — zero build required for Day-0
 created: 2026-07-06
-status: live — Pages deployed
+status: live — Pages deployed; start.ps1 workflow active
+privacy: GitHub Free — public repo; share player URL only
 ---
 
 # GitJuked — Implementation Plan
@@ -79,7 +80,7 @@ See [docs/repo-privacy.md](docs/repo-privacy.md) for the full table. Summary:
 | Private repo + **GitHub Pro** | Works (Pages stays public) | No (for strangers) |
 | Private repo + **Free** | **Breaks** | Private |
 
-**Recommended if you want listen-only sharing:** upgrade to Pro, set repo private, keep Pages public. On Free, keep repo public and share only the Pages URL.
+**Current choice (Free):** repo stays public; share only the Pages URL. Docs omit local paths and session codes. For hidden source, upgrade to Pro (see [docs/repo-privacy.md](docs/repo-privacy.md)).
 
 ---
 
@@ -87,23 +88,42 @@ See [docs/repo-privacy.md](docs/repo-privacy.md) for the full table. Summary:
 
 ```
 GitJuked/
-├── .nojekyll                 # Required: serve audio/ and JSON without Jekyll
-├── .gitignore                # OS junk, optional .DS_Store
-├── index.html                # Migrated v.01 + dual loader + visualizer canvas
-├── tracks.json               # Hosted playlist manifest (generated or hand-edited)
+├── .nojekyll
+├── .gitignore
+├── index.html                # v.01 + dual loader + visualizer + playlist-helpers.js
+├── tracks.json               # Generated from audio/ (do not hand-edit long-term)
+├── package.json              # npm test, test:launch, test:annotation
 ├── audio/
-│   └── playlists/instrumentals/   # Audio files (recursive scan)
+│   └── playlists/instrumentals/   # WAV/MP3/OGG — any subfolder under audio/ OK
+├── docs/
+│   ├── repo-privacy.md
+│   ├── deploy-auth-annotation.md
+│   ├── deploy-auth-visual.html
+│   └── images/github-auth-success.png
 ├── scripts/
-│   └── gen-tracks.ps1        # One-liner: scan audio/ → rewrite tracks.json
-├── README.md                 # Live link, add-track workflow, keyboard cheatsheet
-└── PLAN.md                   # This file
+│   ├── start.ps1             # PRIMARY: sync → git push → preview
+│   ├── gen-tracks.ps1        # Recursive audio/ → tracks.json
+│   ├── audio-scan.js         # Shared scan logic (Node tests)
+│   ├── playlist-helpers.js   # Manifest normalize (browser + tests)
+│   ├── preview.ps1
+│   ├── auth-github.ps1
+│   ├── push-pages.ps1
+│   └── gh.ps1
+├── tests/
+│   ├── playlist-helpers.test.js
+│   ├── annotation-doc.test.js
+│   └── launch-check.mjs
+├── README.md
+├── NOTES.md
+└── PLAN.md
 ```
 
-**Optional later (not Day-0):**
+**Optional later:**
 
 ```
-├── favicon.svg               # Minimal juke glyph in #00ffaa
-└── CNAME                     # Only if custom domain added
+├── favicon.svg
+├── CNAME
+└── scripts/deploy-public.ps1   # Split-repo deploy (Option C in repo-privacy.md)
 ```
 
 ---
@@ -143,7 +163,7 @@ Add CSS:
 ### 2. Track model — unified shape
 
 ```javascript
-// Hosted:  { name: "GitJuke", src: "audio/01_-_gitjuke_-_cxmx.wav" }
+// Hosted:  { name: "01 - gitjuke - cxmx", src: "audio/playlists/instrumentals/01_-_gitjuke_-_cxmx.wav" }
 // Local:   { name: "Track 1", handle: FileSystemFileHandle }
 ```
 
@@ -260,22 +280,16 @@ Runs idle when silent (flat bars) — no extra toggle needed for Day-0.
 {
   "tracks": [
     {
-      "title": "GitJuke",
-      "file": "audio/01_-_gitjuke_-_cxmx.wav"
+      "title": "01 - gitjuke - cxmx",
+      "file": "audio/playlists/instrumentals/01_-_gitjuke_-_cxmx.wav"
     }
   ]
 }
 ```
 
-### 7. `scripts/gen-tracks.ps1` — maintenance one-liner
+### 7. `scripts/gen-tracks.ps1` — recursive scan
 
-```powershell
-# Run from repo root: .\scripts\gen-tracks.ps1
-$tracks = Get-ChildItem audio -File | Where-Object { $_.Extension -match '\.(mp3|wav|ogg|m4a|aac|flac)$' } | Sort-Object Name
-$list = $tracks | ForEach-Object { @{ title = $_.BaseName -replace '_',' '; file = "audio/$($_.Name)" } }
-@{ tracks = @($list) } | ConvertTo-Json -Depth 3 | Set-Content tracks.json -Encoding UTF8
-Write-Host "tracks.json updated ($($tracks.Count) tracks)"
-```
+Scans `audio/` recursively; writes UTF-8 **without BOM**. Prefer `.\scripts\start.ps1` (sync + push + preview) over running `gen-tracks.ps1` alone.
 
 ### 8. Preserve all v.01 taste elements
 
@@ -289,16 +303,13 @@ Write-Host "tracks.json updated ($($tracks.Count) tracks)"
 
 ## Deployment
 
-### Day-0 push checklist
+### Deploy checklist (done)
 
-1. Copy v.01 into `index.html`; apply diffs above
-2. Confirm `audio/01_-_gitjuke_-_cxmx.wav` is committed (check file size — GitHub warns >50 MB; typical WAV OK)
-3. Add `tracks.json`, `.nojekyll`, `README.md`, `scripts/gen-tracks.ps1`
-4. `git add . && git commit -m "feat: GitJuked v1"`
-5. Run **Repo Setup Commands** section
-6. Wait 1–3 minutes; open `https://cxmx-dev.github.io/GitJuked/`
-7. Smoke test: play seed track, scrub timeline, volume, shuffle, keyboard shortcuts
-8. Local test: open `index.html` via `npx serve .` or Live Server — Browse Folder still works
+1. `index.html` shipped with dual loader + visualizer
+2. Audio under `audio/playlists/instrumentals/` (watch GitHub 50 MB/file warning)
+3. `.\scripts\auth-github.ps1` → `.\scripts\push-pages.ps1` for first push
+4. Ongoing: `.\scripts\start.ps1` after adding tracks
+5. Verify: https://cxmx-dev.github.io/GitJuked/ + `npm test`
 
 ### Cache note
 

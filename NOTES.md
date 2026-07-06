@@ -1,14 +1,14 @@
-# Quick commands (local cheat sheet)
+# Quick commands
 
 Replace `GitJuked` with your clone folder name.
 
-## Start (sync + push + preview)
+## Start (sync + push + preview) — use this
 ```powershell
 cd GitJuked
 .\scripts\start.ps1
 ```
 
-## Local preview
+## Local preview only
 ```powershell
 cd GitJuked
 .\scripts\preview.ps1
@@ -21,10 +21,11 @@ Do **not** type `run` before `npx` — that is not valid PowerShell.
 .\scripts\push-pages.ps1
 ```
 
-Walkthrough: [docs/deploy-auth-annotation.md](docs/deploy-auth-annotation.md)
+Docs: [deploy-auth-annotation.md](docs/deploy-auth-annotation.md) · [visual callouts](docs/deploy-auth-visual.html)
 
 ## Privacy (Free plan)
 
 - **Share:** https://cxmx-dev.github.io/GitJuked/
-- **Repo is public** on Free — do not link the GitHub repo URL publicly if you want listen-only sharing
+- **Repo is public** on Free — share player link only, not the GitHub repo URL
+- **Docs:** no local drive paths or session codes in tracked files
 - Details: [docs/repo-privacy.md](docs/repo-privacy.md)

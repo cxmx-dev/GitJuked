@@ -80,14 +80,44 @@ git push
 
 Full breakdown: [docs/repo-privacy.md](docs/repo-privacy.md)
 
+## Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `start.ps1` | **Primary entry** — sync `audio/` → `tracks.json`, push if changed, preview |
+| `gen-tracks.ps1` | Recursive scan of `audio/` → rewrite `tracks.json` |
+| `preview.ps1` | Local server at http://localhost:3000 |
+| `auth-github.ps1` | One-time `gh` device login (full-path wrapper) |
+| `push-pages.ps1` | Create repo, push `main`, enable Pages |
+| `gh.ps1` | `gh` wrapper when CLI is not on PATH |
+
+## Docs
+
+| Doc | Purpose |
+|-----|---------|
+| [docs/repo-privacy.md](docs/repo-privacy.md) | Free vs Pro — player link vs. hidden repo |
+| [docs/deploy-auth-annotation.md](docs/deploy-auth-annotation.md) | First-deploy auth screenshot walkthrough |
+| [docs/deploy-auth-visual.html](docs/deploy-auth-visual.html) | Numbered callouts on auth success image |
+| `PLAN.md` | Architecture, folder tree, iteration tickets |
+
+## Public content policy
+
+Docs use generic paths (`cd GitJuked`) — no local drive letters, machine folders, or session auth codes. On **Free**, the repo is public; share only https://cxmx-dev.github.io/GitJuked/ for listen-only use.
+
 ## Stack
 
-Vanilla HTML / CSS / JS — no build step, no framework. See `PLAN.md` for architecture and iteration tickets.
+Vanilla HTML / CSS / JS — no build step, no framework. Tests: `npm test` (playlist + annotation validators).
 
 ## Version History
 
-2026-07-06
+70626 4:10:02:19 CST
+
+- Synced all `.md` files with `start.ps1` workflow, recursive `audio/` layout, and script/docs index.
+- Documented public content policy (Free plan, sanitized paths, player-link-only sharing).
+- Cross-linked `repo-privacy`, deploy-auth annotation, and visual callouts.
+
+70626 4:03:09:49 CST
 
 - Documented repo privacy vs. public GitHub Pages (Free vs. Pro).
-- Sanitized docs: no local drive paths, timezone, or session-specific auth codes.
+- Sanitized docs: no local drive paths or session-specific auth codes.
 - Staying on Free — share player link only.

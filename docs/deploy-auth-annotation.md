@@ -80,6 +80,8 @@ cd GitJuked
 
 Verify: open https://cxmx-dev.github.io/GitJuked/ — cyber-green HUD, visualizer, seed tracks from `tracks.json`.
 
+**After first deploy:** use `.\scripts\start.ps1` for day-to-day sync (scan `audio/` → `tracks.json` → push → preview). See [README.md](../README.md).
+
 ---
 
 ## Troubleshooting
