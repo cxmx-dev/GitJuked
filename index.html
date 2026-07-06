@@ -48,13 +48,24 @@
       margin:6px 0 2px; font-size:13px; font-weight:600; color:#00ffaa;
     }
     .tree-folder .tree-folder { font-weight:500; color:#7dffc8; }
+    .tree-row {
+      display:flex; align-items:stretch; gap:4px; margin:2px 0;
+    }
     .tree-file {
-      display:block; width:100%; text-align:left; margin:2px 0; padding:7px 10px;
+      flex:1; display:block; text-align:left; padding:7px 10px;
       background:transparent; border:1px solid transparent; border-radius:3px;
       color:#bbb; font-size:13px; cursor:pointer;
     }
     .tree-file:hover { color:#fff; border-color:#333; background:rgba(0,255,170,0.06); }
     .tree-file.active { color:#00ffaa; border-color:#00ffaa; background:rgba(0,255,170,0.1); }
+    .tree-dl {
+      flex-shrink:0; min-width:36px; padding:7px 8px; font-size:15px; font-weight:600;
+      color:#00ffaa; border-color:#333;
+    }
+    .tree-dl:hover { border-color:#00ffaa; color:#fff; background:rgba(0,255,170,0.12); }
+    #audioDrawer .dl-hint {
+      margin:0 0 12px; font-size:12px; color:#7dffc8; opacity:0.9;
+    }
     .tree-indent-0 { padding-left:0; }
     .tree-indent-1 { padding-left:14px; }
     .tree-indent-2 { padding-left:28px; }
@@ -89,6 +100,7 @@
 
   <div id="audioDrawer" aria-label="Audio library" hidden>
     <h2>Audio</h2>
+    <p class="dl-hint">click * to DL to your device</p>
     <div id="audioTree"></div>
   </div>
 
@@ -188,9 +200,53 @@
           }
           node = node.children[part];
         });
-        node.files.push({ name: track.name, index: index, file: filePart });
+        node.files.push({ name: track.name, index: index, file: filePart, src: track.src });
       });
       return root;
+    }
+
+    function downloadFilename(track) {
+      if (track.src) {
+        var parts = track.src.split('/');
+        return parts[parts.length - 1] || track.name;
+      }
+      if (track.file && track.file.name) return track.file.name;
+      return (track.name || 'track').replace(/[^\w.\- ]+/g, '_') + '.wav';
+    }
+
+    function triggerFileDownload(url, filename) {
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function downloadTrack(index) {
+      var track = playlist[index];
+      if (!track) return;
+
+      if (track.src) {
+        triggerFileDownload(track.src, downloadFilename(track));
+        return;
+      }
+
+      if (track.handle) {
+        track.handle.getFile().then(function (file) {
+          var url = URL.createObjectURL(file);
+          triggerFileDownload(url, file.name);
+          setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        }).catch(function (err) { console.warn('Download failed:', err); });
+        return;
+      }
+
+      if (track.file) {
+        var blobUrl = URL.createObjectURL(track.file);
+        triggerFileDownload(blobUrl, downloadFilename(track));
+        setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 1000);
+      }
     }
 
     function renderAudioTreeNode(node, depth) {
@@ -206,9 +262,12 @@
       });
       node.files.sort(function (a, b) { return a.name.localeCompare(b.name); });
       node.files.forEach(function (file) {
+        var row = document.createElement('div');
+        row.className = 'tree-row tree-indent-' + Math.min(depth, 4);
+
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'tree-file tree-indent-' + Math.min(depth, 4) + (file.index === currentIndex ? ' active' : '');
+        btn.className = 'tree-file' + (file.index === currentIndex ? ' active' : '');
         btn.textContent = file.name;
         btn.dataset.index = String(file.index);
         btn.onclick = function () {
@@ -216,7 +275,21 @@
           closeAudioDrawer();
           showHUD();
         };
-        frag.appendChild(btn);
+
+        var dlBtn = document.createElement('button');
+        dlBtn.type = 'button';
+        dlBtn.className = 'tree-dl';
+        dlBtn.textContent = '*';
+        dlBtn.title = 'Download to your device';
+        dlBtn.setAttribute('aria-label', 'Download ' + file.name);
+        dlBtn.onclick = function (e) {
+          e.stopPropagation();
+          downloadTrack(file.index);
+        };
+
+        row.appendChild(btn);
+        row.appendChild(dlBtn);
+        frag.appendChild(row);
       });
       return frag;
     }
