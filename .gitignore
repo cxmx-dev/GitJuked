@@ -15,6 +15,9 @@ page.png
 page-run2.png
 *.log
 
+# Session exports (local only)
+*convo*
+
 # OS
 .DS_Store
 Thumbs.db
