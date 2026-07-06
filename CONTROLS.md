@@ -1,13 +1,14 @@
-﻿# Controls
+# Controls
 
-Click **â–¶** once to start audio (browser requirement).
+Click **▶** once to start audio (browser requirement).
 
 | Key | Action |
 |-----|--------|
 | Space | Play / pause |
-| â† | Previous track |
-| â†’ | Next track |
+| ← | Previous track |
+| → | Next track |
 | S | Shuffle |
-| A | Open Audio library |
+| A | Open / close Audio library |
+| Esc | Close Audio library |
 
-Move the mouse to show the HUD (volume + progress sliders). **Audio** button opens folders and tracks.
+Move the mouse to show the HUD (volume + progress sliders). **Audio** button or track info opens nested folders and tracks from `tracks.json`. Tap outside or press **Esc** to close.

@@ -1,16 +1,20 @@
 {
     "tracks":  [
                    {
-                       "file":  "audio/03_-_gotjuked_-_cxmx.wav",
-                       "title":  "03 - gotjuked - cxmx"
-                   },
-                   {
                        "file":  "audio/playlists/instrumentals/01_-_gitjuke_-_cxmx.wav",
                        "title":  "01 - gitjuke - cxmx"
                    },
                    {
-                       "file":  "audio/playlists/instrumentals/2_-_gitjuked_-_cxmx.wav",
-                       "title":  "2 - gitjuked - cxmx"
+                       "file":  "audio/playlists/instrumentals/02_-_gitjuked_-_cxmx.wav",
+                       "title":  "02 - gitjuked - cxmx"
+                   },
+                   {
+                       "file":  "audio/playlists/instrumentals/03_-_gotjuked_-_cxmx.wav",
+                       "title":  "03 - gotjuked - cxmx"
+                   },
+                   {
+                       "file":  "audio/playlists/vocals/1_-_40k-20k-cloud_(Mashup)_-_cxmx.wav",
+                       "title":  "1 - 40k-20k-cloud (Mashup) - cxmx"
                    }
                ]
 }
