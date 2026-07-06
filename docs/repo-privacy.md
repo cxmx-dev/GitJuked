@@ -5,6 +5,8 @@
 
 Goal: listeners use the player link without needing (or finding) the GitHub repo.
 
+**Current choice: GitHub Free** — repo stays **public** (required for Pages). Share only the player URL in applications, posts, and DMs.
+
 ---
 
 ## How GitHub treats this
@@ -32,13 +34,13 @@ Visitors still download static files (`index.html`, `audio/`, `tracks.json`) whe
 
 ---
 
-## Option B — Stay on Free
+## Option B — Stay on Free (selected)
 
 Keep the repo **public**, but:
 
 - Share only the **Pages link**, not the GitHub repo URL
-- Optionally strip or minimize README on GitHub (player still works)
-- Accept that anyone who searches GitHub can still find the repo
+- Docs use generic paths (no local drive letters or machine-specific folders)
+- Accept that anyone who searches GitHub can still find the repo and source
 
 ---
 

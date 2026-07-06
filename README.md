@@ -5,7 +5,8 @@
 Drop audio anywhere under `audio/` (subfolders OK), then start GitJuked:
 
 ```powershell
-cd E:\Code-Y\GitJuked
+git clone https://github.com/cxmx-dev/GitJuked.git
+cd GitJuked
 .\scripts\start.ps1
 ```
 
@@ -75,6 +76,8 @@ git push
 
 **Do not** set the repo to private on a Free account — `https://cxmx-dev.github.io/GitJuked/` will break.
 
+**This project stays on Free** — repo is public; share only the player link above, not the GitHub repo URL.
+
 Full breakdown: [docs/repo-privacy.md](docs/repo-privacy.md)
 
 ## Stack
@@ -83,7 +86,8 @@ Vanilla HTML / CSS / JS — no build step, no framework. See `PLAN.md` for archi
 
 ## Version History
 
-70626 4:03:09:49 CST
+2026-07-06
 
-- Documented repo privacy vs. public GitHub Pages (Free vs. Pro, split-repo and host-elsewhere options).
-- Linked `docs/repo-privacy.md`; run instructions remain at top of README.
+- Documented repo privacy vs. public GitHub Pages (Free vs. Pro).
+- Sanitized docs: no local drive paths, timezone, or session-specific auth codes.
+- Staying on Free — share player link only.

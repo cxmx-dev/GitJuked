@@ -6,8 +6,6 @@
 
 **Visual numbered callouts:** [deploy-auth-visual.html](deploy-auth-visual.html) — pins 1–6 overlaid on the screenshot.
 
-*Session asset copy: `image-6aaaad04-1c35-4541-920a-b2814808e97e.png`*
-
 ---
 
 ## What you are looking at
@@ -24,19 +22,19 @@ GitHub’s dark-theme **device login success** page. It appears at `https://gith
 | 2 | **Success card** (center, rounded rectangle, thin border) | Confirmation container | Frames the auth result; no further input needed on this page. |
 | 3 | **Blue checkmark** (✓, top of card) | Success indicator | Device pairing succeeded; GitHub accepted your one-time code. |
 | 4 | **Headline** — *“Congratulations, you're all set!”* | Primary message | Auth is complete. Safe to close this tab and return to PowerShell. |
-| 5 | **Subtext** — *“Your device is now connected.”* | Secondary message | This PC’s GitHub CLI session is linked to your account (`cxmx-dev`). |
+| 5 | **Subtext** — *“Your device is now connected.”* | Secondary message | GitHub CLI on your machine is linked to account `cxmx-dev`. |
 | 6 | **Footer** (© 2026 GitHub, Inc. + Terms / Privacy / … links) | Standard GitHub chrome | Unrelated to deploy; ignore for workflow purposes. |
 
 ---
 
 ## Paired PowerShell output
 
-This screenshot corresponds to running `.\scripts\auth-github.ps1` from `E:\Code-Y\GitJuked`:
+This screenshot corresponds to running `.\scripts\auth-github.ps1` from the repo root:
 
 ```text
 ? Authenticate Git with your GitHub credentials? Yes
 
-! First copy your one-time code: 67F0-AE3D
+! First copy your one-time code: XXXX-XXXX
 Press Enter to open https://github.com/login/device in your browser...
 ✓ Authentication complete.
 - gh config set -h github.com git_protocol https
@@ -46,7 +44,7 @@ Press Enter to open https://github.com/login/device in your browser...
 
 | Terminal line | Ties to image |
 |---------------|---------------|
-| `67F0-AE3D` | Code you paste on the device-login page **before** this success screen appears. |
+| `XXXX-XXXX` | One-time code you paste on the device-login page **before** this success screen appears. |
 | `Press Enter to open https://github.com/login/device` | Opens the browser tab that ends on Image #1. |
 | `✓ Authentication complete.` | Browser and CLI are in sync — same moment as the checkmark screen. |
 | `✓ Logged in as cxmx-dev` | Account that will own `cxmx-dev/GitJuked` and Pages. |
@@ -58,7 +56,7 @@ Press Enter to open https://github.com/login/device in your browser...
 Auth is done when you see Image #1 **and** `Logged in as cxmx-dev` in the terminal. Immediately run:
 
 ```powershell
-cd E:\Code-Y\GitJuked
+cd GitJuked
 .\scripts\push-pages.ps1
 ```
 
@@ -75,7 +73,7 @@ That script:
 ## Full first-deploy sequence (auth → push → live)
 
 ```powershell
-cd E:\Code-Y\GitJuked
+cd GitJuked
 .\scripts\auth-github.ps1    # → Image #1 + "Logged in as cxmx-dev"
 .\scripts\push-pages.ps1     # → repo + Pages live
 ```

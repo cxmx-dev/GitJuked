@@ -34,8 +34,7 @@ function testAnnotationDocExistsAndComplete() {
     'cxmx-dev',
     'push-pages',
     'https://cxmx-dev.github.io/GitJuked/',
-    '67F0-AE3D',
-    'image-6aaaad04-1c35-4541-920a-b2814808e97e.png'
+    'XXXX-XXXX'
   ];
   requiredStrings.forEach(function (s) {
     assert.ok(doc.includes(s), 'missing required string: ' + s);

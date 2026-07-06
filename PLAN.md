@@ -4,9 +4,8 @@ project: GitJuked
 github_user: cxmx-dev
 github_url: https://github.com/cxmx-dev
 pages_url: https://cxmx-dev.github.io/GitJuked/
-local_root: E:\Code-Y\GitJuked
 source: ANON-AUDIO-PLAYER v.01 (single-file HTML + File System Access API)
-seed_track: audio/01_-_gitjuke_-_cxmx.wav
+seed_track: audio/playlists/instrumentals/
 stack: vanilla HTML/CSS/JS — zero build required for Day-0
 created: 2026-07-06
 status: live — Pages deployed
@@ -27,16 +26,16 @@ Turn **ANON-AUDIO-PLAYER v.01** into **GitJuked**: a cyber-green HUD media playe
 
 Visitors get instant playback of committed tracks. You add/replace `.wav` / `.mp3` / `.ogg` files via GitHub web UI or `git push` — no redeploy step beyond the commit landing on `main`.
 
-**Success metric:** After following this plan, `https://cxmx-dev.github.io/GitJuked/` looks and feels like a finished portfolio demo — black canvas, `#00ffaa` HUD, auto-hide controls, keyboard shortcuts, mobile-friendly ranges, and a live visualizer hooked to the existing `AnalyserNode`.
+**Success metric:** After following this plan, `https://cxmx-dev.github.io/GitJuked/` looks and feels like a finished demo — black canvas, `#00ffaa` HUD, auto-hide controls, keyboard shortcuts, mobile-friendly ranges, and a live visualizer hooked to the existing `AnalyserNode`.
 
 ---
 
 ## Repo Setup Commands
 
-Run from `E:\Code-Y\GitJuked` after files are created (Day-0 checklist below).
+Run from the repo root after files are created (Day-0 checklist below).
 
 ```powershell
-cd E:\Code-Y\GitJuked
+cd GitJuked
 
 # One-time: init + first commit
 git init
@@ -93,7 +92,7 @@ GitJuked/
 ├── index.html                # Migrated v.01 + dual loader + visualizer canvas
 ├── tracks.json               # Hosted playlist manifest (generated or hand-edited)
 ├── audio/
-│   └── 01_-_gitjuke_-_cxmx.wav   # Seed track (already present locally)
+│   └── playlists/instrumentals/   # Audio files (recursive scan)
 ├── scripts/
 │   └── gen-tracks.ps1        # One-liner: scan audio/ → rewrite tracks.json
 ├── README.md                 # Live link, add-track workflow, keyboard cheatsheet
@@ -111,14 +110,14 @@ GitJuked/
 
 ## Code Diffs
 
-Base: **v.01** from `anonplayer.html` (lines 230–426 — cleaner style block with `input[type="range"]#volume { width:90px }` and `input[type="range"]#timeline { flex:1 }`).
+Base: **v.01** single-file HTML (cleaner style block with `input[type="range"]#volume { width:90px }` and `input[type="range"]#timeline { flex:1 }`).
 
 ### 1. `<head>` — title, meta, visualizer layer
 
 ```diff
 - <title>ANON-AUDIO-PLAYER 2</title>
 + <title>GitJuked</title>
-+ <meta name="description" content="GitJuked — minimal cyber-green audio player by cxmx-dev">
++ <meta name="description" content="GitJuked — minimal cyber-green audio player">
 ```
 
 Add before `#hud` in `<body>`:
@@ -331,9 +330,9 @@ Audio may live in subfolders (e.g. `audio/playlists/instrumentals/`); `gen-track
 
 ---
 
-## Polish & Portfolio Wins
+## Polish wins
 
-Five fast upgrades that signal *Creative Technologist who ships clean interactive audio experiences*:
+Five fast upgrades for a sharper public demo:
 
 1. **README hero** — One screenshot GIF of the visualizer + HUD; live badge linking to Pages URL; keyboard shortcut table
 2. **Branded title flash** — On first load, 1.2s fade of "GitJuked" in `#00ffaa` center-screen before HUD-only mode (CSS animation, no framework)
@@ -353,7 +352,7 @@ Five fast upgrades that signal *Creative Technologist who ships clean interactiv
 
 ### Timeline
 
-- **Day-0 (today):** Dual-mode `index.html`, seed track, Pages live — portfolio-linkable
+- **Day-0 (today):** Dual-mode `index.html`, seed track, Pages live
 - **Day-1:** T1 visualizer skin
 - **Day-2:** T2 metadata + T3 fork CTA
 
@@ -361,13 +360,13 @@ Five fast upgrades that signal *Creative Technologist who ships clean interactiv
 
 ## Source Reference
 
-v.01 baseline (migrate from `E:\Code-Y\anonplayer.html`, second block):
+v.01 baseline:
 
 - `AudioContext` + `AnalyserNode` (`fftSize = 256`) already wired via `createMediaElementSource`
 - Playlist: `{ name, handle }` from `showDirectoryPicker`
-- No visualizer draw loop yet — analyser is ready for Ticket T1 expansion
+- Visualizer draw loop wired in Day-0 `index.html`
 
-Seed audio already at: `E:\Code-Y\GitJuked\audio\01_-_gitjuke_-_cxmx.wav`
+Seed audio under `audio/playlists/instrumentals/`
 
 ---
 
