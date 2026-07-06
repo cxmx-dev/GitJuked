@@ -55,11 +55,13 @@ Open http://localhost:3000 — hosted mode loads automatically. **Browse Folder*
 `gh` is required once for auth. If not installed: `winget install GitHub.cli`
 
 ```powershell
-gh auth login -h github.com -p https -w
+.\scripts\auth-github.ps1
 .\scripts\push-pages.ps1
 ```
 
 Live URL after ~1–3 min: https://cxmx-dev.github.io/GitJuked/
+
+**Walkthrough:** See [deploy-auth annotation](docs/deploy-auth-annotation.md) — annotated screenshot of the GitHub “you're all set!” screen, paired terminal output, and the exact auth → push → live sequence.
 
 ## Stack
 

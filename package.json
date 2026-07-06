@@ -2,8 +2,9 @@
   "name": "gitjuked",
   "private": true,
   "scripts": {
-    "test": "node tests/playlist-helpers.test.js",
-    "test:launch": "node tests/launch-check.mjs"
+    "test": "node tests/playlist-helpers.test.js && node tests/annotation-doc.test.js",
+    "test:launch": "node tests/launch-check.mjs",
+    "test:annotation": "node tests/annotation-doc.test.js"
   },
   "devDependencies": {
     "playwright": "^1.61.1"
