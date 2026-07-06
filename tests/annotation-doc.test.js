@@ -58,12 +58,8 @@ function testImageCommitted() {
 
 function testCrossLinks() {
   const readme = read(path.join(root, 'README.md'));
-  const notes = read(path.join(root, 'NOTES.md'));
   const link = 'docs/deploy-auth-annotation.md';
-  assert.ok(
-    readme.includes(link) || notes.includes(link),
-    'README.md or NOTES.md must link to annotation doc'
-  );
+  assert.ok(readme.includes(link), 'README.md must link to annotation doc');
 }
 
 testAnnotationDocExistsAndComplete();

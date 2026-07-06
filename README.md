@@ -98,7 +98,6 @@ Full breakdown: [docs/repo-privacy.md](docs/repo-privacy.md)
 | [docs/repo-privacy.md](docs/repo-privacy.md) | Free vs Pro — player link vs. hidden repo |
 | [docs/deploy-auth-annotation.md](docs/deploy-auth-annotation.md) | First-deploy auth screenshot walkthrough |
 | [docs/deploy-auth-visual.html](docs/deploy-auth-visual.html) | Numbered callouts on auth success image |
-| `PLAN.md` | Architecture, folder tree, iteration tickets |
 
 ## Public content policy
 
@@ -109,6 +108,10 @@ Docs use generic paths (`cd GitJuked`) — no local drive letters, machine folde
 Vanilla HTML / CSS / JS — no build step, no framework. Tests: `npm test` (playlist + annotation validators).
 
 ## Version History
+
+70626 4:15:00:00 CST
+
+- Removed `PLAN.md`, `NOTES.md`, and `pics/` from repo (local-only; gitignored).
 
 70626 4:10:02:19 CST
 

@@ -77,6 +77,6 @@ To avoid exposing machine-specific details in the public repo:
 
 - Docs use `cd GitJuked` — not local drive letters or user profile paths
 - Auth walkthrough redacts one-time device codes (`XXXX-XXXX`)
-- `NOTES.md`, `README.md`, and `PLAN.md` describe workflow only — no session artifacts
+- Public docs (`README.md`, `docs/`) describe workflow only — no session artifacts; `PLAN.md` / `NOTES.md` stay local
 
 **Still public by nature:** GitHub username in URLs, audio filenames in `tracks.json`, and full source while repo stays public on Free.
