@@ -1,6 +1,10 @@
 {
     "tracks":  [
                    {
+                       "file":  "audio/03_-_gotjuked_-_cxmx.wav",
+                       "title":  "03 - gotjuked - cxmx"
+                   },
+                   {
                        "file":  "audio/playlists/instrumentals/01_-_gitjuke_-_cxmx.wav",
                        "title":  "01 - gitjuke - cxmx"
                    },
