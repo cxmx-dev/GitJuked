@@ -1,12 +1,20 @@
-.DS_Store
-Thumbs.db
-desktop.ini
+# --- local only (never published) ---
+scripts/
+tests/
+docs/
+package.json
+package-lock.json
 node_modules/
-mcps/
-terminals/
 PLAN.md
 NOTES.md
 pics/
+mcps/
+terminals/
 page.png
 page-run2.png
 *.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -56,8 +56,22 @@
 
   <audio id="audio"></audio>
 
-  <script src="scripts/playlist-helpers.js"></script>
   <script>
+    var GitJukedPlaylist = {
+      normalizeManifest: function (data) {
+        var raw = data && (data.tracks || data);
+        if (!Array.isArray(raw)) return [];
+        return raw.map(function (t) {
+          return { name: t.title || t.name || '', src: t.file || t.src || '' };
+        }).filter(function (t) { return t.name && t.src; });
+      },
+      buildSelectOptions: function (tracks) {
+        return tracks.map(function (t, i) {
+          return { label: t.name, value: String(i) };
+        });
+      }
+    };
+
     const audio = document.getElementById('audio');
     const hud = document.getElementById('hud');
     const prevBtn = document.getElementById('prev');
