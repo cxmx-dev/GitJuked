@@ -1,5 +1,11 @@
 # Quick commands
 
+## Start (sync + push + preview)
+```powershell
+cd E:\Code-Y\GitJuked
+.\scripts\start.ps1
+```
+
 ## Local preview (PowerShell)
 ```powershell
 cd E:\Code-Y\GitJuked

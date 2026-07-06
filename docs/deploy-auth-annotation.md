@@ -4,6 +4,8 @@
 
 ![GitHub device authentication success](images/github-auth-success.png)
 
+**Visual numbered callouts:** [deploy-auth-visual.html](deploy-auth-visual.html) — pins 1–6 overlaid on the screenshot.
+
 *Session asset copy: `image-6aaaad04-1c35-4541-920a-b2814808e97e.png`*
 
 ---

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Image #1 — annotated regions</title>
+  <style>
+    body { margin: 0; background: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', sans-serif; padding: 24px; }
+    h1 { font-size: 1.1rem; color: #00ffaa; }
+    .frame { position: relative; display: inline-block; max-width: 900px; margin: 16px 0; }
+    .frame img { width: 100%; display: block; border: 1px solid #30363d; border-radius: 8px; }
+    .pin {
+      position: absolute; width: 28px; height: 28px; border-radius: 50%;
+      background: #00ffaa; color: #000; font-weight: 700; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px rgba(0,255,170,0.5); border: 2px solid #000;
+    }
+    .pin-1 { top: 4%; left: 50%; transform: translateX(-50%); }
+    .pin-2 { top: 28%; left: 50%; transform: translateX(-50%); }
+    .pin-3 { top: 36%; left: 50%; transform: translateX(-50%); }
+    .pin-4 { top: 44%; left: 50%; transform: translateX(-50%); }
+    .pin-5 { top: 52%; left: 50%; transform: translateX(-50%); }
+    .pin-6 { bottom: 6%; left: 12%; }
+    ol { line-height: 1.7; }
+    a { color: #58a6ff; }
+  </style>
+</head>
+<body>
+  <h1>Image #1 — GitHub device-auth success (numbered regions)</h1>
+  <p>Open alongside <a href="deploy-auth-annotation.md">deploy-auth-annotation.md</a>.</p>
+  <div class="frame">
+    <img src="images/github-auth-success.png" alt="GitHub auth success screen">
+    <div class="pin pin-1" title="GitHub logo">1</div>
+    <div class="pin pin-2" title="Success card">2</div>
+    <div class="pin pin-3" title="Blue checkmark">3</div>
+    <div class="pin pin-4" title="Headline">4</div>
+    <div class="pin pin-5" title="Subtext">5</div>
+    <div class="pin pin-6" title="Footer">6</div>
+  </div>
+  <ol>
+    <li><strong>GitHub logo</strong> — official device-login page</li>
+    <li><strong>Success card</strong> — auth result container; no further input</li>
+    <li><strong>Blue checkmark</strong> — one-time code accepted</li>
+    <li><strong>“Congratulations, you're all set!”</strong> — auth complete; close tab</li>
+    <li><strong>“Your device is now connected.”</strong> — CLI linked to <code>cxmx-dev</code></li>
+    <li><strong>Footer</strong> — standard GitHub links; ignore for deploy</li>
+  </ol>
+  <p>Next: <code>.\scripts\push-pages.ps1</code> → <a href="https://cxmx-dev.github.io/GitJuked/">https://cxmx-dev.github.io/GitJuked/</a></p>
+</body>
+</html>

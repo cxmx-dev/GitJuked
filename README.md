@@ -1,8 +1,37 @@
 # GitJuked
 
-Zero-dependency cyber-green HUD audio player — hosted on GitHub Pages, with local **Browse Folder** power-user mode.
+## How to run
 
-**Live:** https://cxmx-dev.github.io/GitJuked/
+Drop audio anywhere under `audio/` (subfolders OK), then start GitJuked:
+
+```powershell
+cd E:\Code-Y\GitJuked
+.\scripts\start.ps1
+```
+
+**`start.ps1` does this every time:**
+
+1. Scans `audio/` recursively and rewrites `tracks.json`
+2. Commits and pushes to GitHub if `audio/` or `tracks.json` changed
+3. Opens local preview at http://localhost:3000
+
+**Live site:** https://cxmx-dev.github.io/GitJuked/
+
+---
+
+### Manual steps (if you only need one piece)
+
+| Task | Command |
+|------|---------|
+| Sync `tracks.json` only | `.\scripts\gen-tracks.ps1` |
+| Local preview only | `.\scripts\preview.ps1` |
+| First-time GitHub auth | `.\scripts\auth-github.ps1` then `.\scripts\push-pages.ps1` |
+
+First-deploy walkthrough: [docs/deploy-auth-annotation.md](docs/deploy-auth-annotation.md) · [visual callouts](docs/deploy-auth-visual.html)
+
+---
+
+Zero-dependency cyber-green HUD audio player — hosted on GitHub Pages, with local **Browse Folder** power-user mode.
 
 ## Features
 
@@ -20,48 +49,19 @@ Zero-dependency cyber-green HUD audio player — hosted on GitHub Pages, with lo
 | → | Next track |
 | S | Shuffle playlist |
 
-## Add a track in under 60 seconds
+## Add a track
 
-1. Drop your `.wav` / `.mp3` / `.ogg` file into `audio/` (GitHub web UI or local copy)
-2. Regenerate the manifest:
-   ```powershell
-   .\scripts\gen-tracks.ps1
-   ```
-3. Commit and push:
-   ```powershell
-   git add audio/ tracks.json
-   git commit -m "track: your-filename"
-   git push
-   ```
+1. Drop `.wav` / `.mp3` / `.ogg` into `audio/` (any subfolder)
+2. Run `.\scripts\start.ps1` — syncs, pushes, and previews automatically
 
-Live site updates within ~1–2 minutes. No HTML edits required.
-
-## Local preview
+Or push manually:
 
 ```powershell
-.\scripts\preview.ps1
+.\scripts\gen-tracks.ps1
+git add audio/ tracks.json
+git commit -m "track: your-filename"
+git push
 ```
-
-Or without the script (no `run` prefix — PowerShell does not use that):
-
-```powershell
-npx serve .
-```
-
-Open http://localhost:3000 — hosted mode loads automatically. **Browse Folder** still works for local libraries.
-
-## First-time GitHub Pages deploy
-
-`gh` is required once for auth. If not installed: `winget install GitHub.cli`
-
-```powershell
-.\scripts\auth-github.ps1
-.\scripts\push-pages.ps1
-```
-
-Live URL after ~1–3 min: https://cxmx-dev.github.io/GitJuked/
-
-**Walkthrough:** See [deploy-auth annotation](docs/deploy-auth-annotation.md) — annotated screenshot of the GitHub “you're all set!” screen, paired terminal output, and the exact auth → push → live sequence.
 
 ## Stack
 

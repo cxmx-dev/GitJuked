@@ -4,4 +4,7 @@ desktop.ini
 node_modules/
 mcps/
 terminals/
+pics/
+page.png
+page-run2.png
 *.log

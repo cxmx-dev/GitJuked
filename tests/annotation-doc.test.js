@@ -42,6 +42,15 @@ function testAnnotationDocExistsAndComplete() {
   });
 
   assert.ok(doc.includes('images/github-auth-success.png'), 'markdown must embed committed image path');
+  assert.ok(doc.includes('deploy-auth-visual.html'), 'markdown must link visual annotation');
+}
+
+function testVisualAnnotationExists() {
+  const visualPath = path.join(root, 'docs', 'deploy-auth-visual.html');
+  assert.ok(fs.existsSync(visualPath), 'docs/deploy-auth-visual.html must exist');
+  const html = read(visualPath);
+  assert.ok(html.includes('pin-1') && html.includes('pin-6'), 'visual must have numbered region pins');
+  assert.ok(html.includes('github-auth-success.png'), 'visual must reference committed image');
 }
 
 function testImageCommitted() {
@@ -59,6 +68,7 @@ function testCrossLinks() {
 }
 
 testAnnotationDocExistsAndComplete();
+testVisualAnnotationExists();
 testImageCommitted();
 testCrossLinks();
 console.log('annotation-doc.test.js: all tests passed');

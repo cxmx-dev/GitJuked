@@ -1,11 +1,11 @@
 {
     "tracks":  [
                    {
-                       "file":  "audio/01_-_gitjuke_-_cxmx.wav",
+                       "file":  "audio/playlists/instrumentals/01_-_gitjuke_-_cxmx.wav",
                        "title":  "01 - gitjuke - cxmx"
                    },
                    {
-                       "file":  "audio/2_-_gitjuked_-_cxmx.wav",
+                       "file":  "audio/playlists/instrumentals/2_-_gitjuked_-_cxmx.wav",
                        "title":  "2 - gitjuked - cxmx"
                    }
                ]

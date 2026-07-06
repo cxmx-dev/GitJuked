@@ -9,7 +9,7 @@ if (-not (Test-Path $gh)) { $gh = 'gh' }
 
 & $gh auth status 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
-  Write-Host 'Not logged in. Run: gh auth login -h github.com -p https -w'
+  Write-Host 'Not logged in. Run: .\scripts\auth-github.ps1'
   exit 1
 }
 

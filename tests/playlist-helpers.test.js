@@ -1,7 +1,12 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const { normalizeManifest, buildSelectOptions } = require('../scripts/playlist-helpers.js');
+const { scanAudioFolder } = require('../scripts/audio-scan.js');
+
+const root = path.join(__dirname, '..');
 
 function testNormalizeManifest() {
   const wrapped = normalizeManifest({
@@ -40,18 +45,14 @@ function testBuildSelectOptions() {
 }
 
 function testManifestMatchesAudioFolder() {
-  const fs = require('fs');
-  const path = require('path');
-  const root = path.join(__dirname, '..');
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'tracks.json'), 'utf8'));
   const normalized = normalizeManifest(manifest);
-  const audioFiles = fs.readdirSync(path.join(root, 'audio'))
-    .filter(function (f) { return /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(f); })
-    .sort();
-  assert.strictEqual(normalized.length, audioFiles.length);
-  normalized.forEach(function (t, i) {
-    assert.strictEqual(t.src, 'audio/' + audioFiles[i]);
-    assert.ok(t.name.length > 0);
+  const scanned = scanAudioFolder(root);
+
+  assert.strictEqual(normalized.length, scanned.length, 'tracks.json count must match audio/ scan');
+  scanned.forEach(function (entry, i) {
+    assert.strictEqual(normalized[i].src, entry.file);
+    assert.ok(normalized[i].name.length > 0);
   });
 }
 
