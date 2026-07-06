@@ -39,10 +39,27 @@ Live site updates within ~1–2 minutes. No HTML edits required.
 ## Local preview
 
 ```powershell
+.\scripts\preview.ps1
+```
+
+Or without the script (no `run` prefix — PowerShell does not use that):
+
+```powershell
 npx serve .
 ```
 
 Open http://localhost:3000 — hosted mode loads automatically. **Browse Folder** still works for local libraries.
+
+## First-time GitHub Pages deploy
+
+`gh` is required once for auth. If not installed: `winget install GitHub.cli`
+
+```powershell
+gh auth login -h github.com -p https -w
+.\scripts\push-pages.ps1
+```
+
+Live URL after ~1–3 min: https://cxmx-dev.github.io/GitJuked/
 
 ## Stack
 
