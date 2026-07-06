@@ -84,10 +84,22 @@
     const volumeSlider = document.getElementById('volume');
     const timelineSlider = document.getElementById('timeline');
 
-    const audioCtx = new AudioContext();
-    const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 256;
-    audioCtx.createMediaElementSource(audio).connect(analyser).connect(audioCtx.destination);
+    let audioCtx = null;
+    let analyser = null;
+    let freqData = null;
+    let audioGraphReady = false;
+
+    function ensureAudio() {
+      if (!audioGraphReady) {
+        audioCtx = new AudioContext();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        audioCtx.createMediaElementSource(audio).connect(analyser).connect(audioCtx.destination);
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+        audioGraphReady = true;
+      }
+      return audioCtx.resume();
+    }
 
     let playlist = [];
     let currentIndex = 0;
@@ -155,7 +167,7 @@
         audio.src = track.src;
         audio.load();
         if (isPlaying) {
-          audioCtx.resume().then(function () { audio.play().catch(function () {}); });
+          ensureAudio().then(function () { audio.play().catch(function () {}); });
         }
         return;
       }
@@ -166,7 +178,7 @@
           audio.src = currentObjectURL;
           audio.load();
           if (isPlaying) {
-            audioCtx.resume().then(function () { audio.play().catch(function () {}); });
+            ensureAudio().then(function () { audio.play().catch(function () {}); });
           }
         });
       } else if (track.file) {
@@ -174,13 +186,19 @@
         audio.src = currentObjectURL;
         audio.load();
         if (isPlaying) {
-          audioCtx.resume().then(function () { audio.play().catch(function () {}); });
+          ensureAudio().then(function () { audio.play().catch(function () {}); });
         }
       }
     }
 
     async function loadFolder() {
+      if (!window.showDirectoryPicker) {
+        trackInfo.textContent = 'Browse Folder works locally — use playlist above on the live site';
+        showHUD();
+        return;
+      }
       try {
+        await ensureAudio();
         const dirHandle = await window.showDirectoryPicker();
         playlist = [];
         playlistSelect.innerHTML = '';
@@ -200,14 +218,18 @@
           showHUD();
         }
       } catch (err) {
-        if (err.name !== 'AbortError') alert('Folder picker unavailable.');
+        if (err.name !== 'AbortError') {
+          trackInfo.textContent = 'Folder picker unavailable in this browser';
+          showHUD();
+        }
       }
     }
 
     loadBtn.onclick = loadFolder;
+    if (IS_HOSTED) loadBtn.style.display = 'none';
 
     playBtn.onclick = async function () {
-      await audioCtx.resume();
+      await ensureAudio();
       if (isPlaying) {
         audio.pause();
         playBtn.textContent = '▶';
@@ -268,7 +290,10 @@
 
     function resetActivity() { showHUD(); }
     document.addEventListener('mousemove', resetActivity);
-    document.addEventListener('click', resetActivity);
+    document.addEventListener('click', function () {
+      resetActivity();
+      ensureAudio().catch(function () {});
+    });
     document.addEventListener('keydown', function (e) {
       resetActivity();
       if (e.code === 'Space') { e.preventDefault(); playBtn.click(); }
@@ -281,7 +306,6 @@
 
     const viz = document.getElementById('viz');
     const vizCtx = viz.getContext('2d');
-    const freqData = new Uint8Array(analyser.frequencyBinCount);
 
     function resizeViz() {
       viz.width = innerWidth;
@@ -292,11 +316,12 @@
 
     function drawViz() {
       requestAnimationFrame(drawViz);
-      analyser.getByteFrequencyData(freqData);
       const w = viz.width;
       const h = viz.height;
       vizCtx.fillStyle = 'rgba(0,0,0,0.15)';
       vizCtx.fillRect(0, 0, w, h);
+      if (!analyser || !freqData) return;
+      analyser.getByteFrequencyData(freqData);
       const barW = w / freqData.length;
       for (let i = 0; i < freqData.length; i++) {
         const barH = Math.max(1, (freqData[i] / 255) * h * 0.45);

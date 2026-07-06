@@ -1,5 +1,7 @@
 # Controls
 
+Click **▶** once to start audio (browser requirement).
+
 | Key | Action |
 |-----|--------|
 | Space | Play / pause |
