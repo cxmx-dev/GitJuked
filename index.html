@@ -170,7 +170,7 @@
     let currentObjectURL = null;
     const HIDE_DELAY = 2200;
     const IS_HOSTED = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    const AUDIO_EXT = /\.(mp3|wav|ogg|m4a|aac|flac)$/i;
+    const AUDIO_EXT = /\.(mp3|wav|ogg|oga|opus|m4a|m4b|aac|flac|wma|aiff|aif|webm|weba|mid|midi|amr|3gp|ac3|mka|caf|wv|ape)$/i;
 
     function revokeCurrentURL() {
       if (currentObjectURL) {
@@ -220,7 +220,7 @@
         return parts[parts.length - 1] || track.name;
       }
       if (track.file && track.file.name) return track.file.name;
-      return (track.name || 'track').replace(/[^\w.\- ]+/g, '_') + '.wav';
+      return (track.name || 'track').replace(/[^\w.\- ]+/g, '_') + '.audio';
     }
 
     function triggerFileDownload(url, filename) {
