@@ -1,24 +1,28 @@
-# --- local only (never published) ---
-scripts/
-tests/
+# --- hub deploy + local docs (never published) ---
+_project.ps1
+ensure-publish.ps1
+gen-tracks.ps1
+preview.ps1
+push-pages.ps1
+start.ps1
 docs/
-package.json
-package-lock.json
-node_modules/
 PLAN.md
 NOTES.md
+NOTES.txt
 README.dev.md
+*convo*
+scripts/
+tests/
 pics/
 mcps/
 terminals/
-page.png
-page-run2.png
-*.log
 
-# Session exports (local only)
-*convo*
-
-# OS
+# OS / tooling
 .DS_Store
 Thumbs.db
-desktop.ini
+*.log
+package.json
+package-lock.json
+node_modules/
+page.png
+page-run2.png
