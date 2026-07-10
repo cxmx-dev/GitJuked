@@ -3,11 +3,13 @@
 <head>
   <title>GitJuked</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="GitJuked — minimal cyber-green audio player">
+  <meta name="mobile-web-app-capable" content="yes">
   <link rel="icon" href="data:,">
+  <script src="device.js"></script>
   <style>
-    html, body { margin:0; padding:0; overflow:hidden; height:100%; background:#000; color:#ccc; font-family:'Segoe UI',Arial,sans-serif; }
+    html, body { margin:0; padding:0; overflow:hidden; height:100%; background:#000; color:#ccc; font-family:'Segoe UI',Arial,sans-serif; -webkit-tap-highlight-color:transparent; }
     #viz {
       position:fixed; inset:0; width:100%; height:100%;
       z-index:0; pointer-events:none;
@@ -78,10 +80,29 @@
     .tree-indent-2 { padding-left:28px; }
     .tree-indent-3 { padding-left:42px; }
     .tree-indent-4 { padding-left:56px; }
-    @media (max-width:680px) {
-      #hud { min-width:unset; left:8px; right:8px; bottom:8px; }
-      #trackInfo { min-width:120px; }
+    /* Device-aware: phone / tablet / coarse pointer */
+    @media (max-width:680px), (pointer: coarse) {
+      #hud {
+        min-width:unset; left:8px; right:8px; bottom: max(8px, env(safe-area-inset-bottom));
+        padding:10px 12px; font-size:14px;
+      }
+      .controls { flex-wrap:wrap; gap:8px; }
+      .controls button {
+        min-height:44px; min-width:44px; padding:10px 12px; font-size:16px;
+      }
+      #trackInfo { min-width:0; flex:1 1 100%; order:10; margin-left:0; font-size:14px; }
+      #trackDl { min-height:44px; min-width:44px; }
+      #load { display:none; } /* folder browse is desktop-ish; library is Audio drawer */
+      .range-controls { gap:10px; margin-top:10px; }
+      input[type="range"]#volume { width:72px; height:28px; }
+      input[type="range"]#timeline { min-height:28px; }
+      #audioDrawer { max-height:70vh; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
+      .tree-file, .tree-dl { min-height:44px; font-size:15px; }
     }
+    html.device-phone #hud, html.device-tablet #hud {
+      min-width:unset; left:8px; right:8px;
+    }
+    html.input-touch button:active { transform:scale(0.97); }
   </style>
 </head>
 <body oncontextmenu="return false;">
