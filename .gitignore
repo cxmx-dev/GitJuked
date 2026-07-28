@@ -14,6 +14,8 @@ README.dev.md
 USER-*.md
 *convo*
 scripts/
+!scripts/sanitize-timezones.sh
+!scripts/sanitize-timezones.ps1
 tests/
 pics/
 mcps/
