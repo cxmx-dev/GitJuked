@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>GitJuked</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="GitJuked — minimal cyber-green audio player">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" href="data:,">
+  <script src="device.js"></script>
+  <style>
+    html, body { margin:0; padding:0; overflow:hidden; height:100%; background:#000; color:#ccc; font-family:'Segoe UI',Arial,sans-serif; -webkit-tap-highlight-color:transparent; }
+    #viz {
+      position:fixed; inset:0; width:100%; height:100%;
+      z-index:0; pointer-events:none;
+    }
+    #hud {
+      position:fixed; bottom:12px; right:12px; background:rgba(10,10,10,0.88); padding:8px 12px;
+      border-radius:4px; border:1px solid #222; color:#00ffaa; font-size:13px;
+      box-shadow:0 0 8px rgba(0,255,170,0.12); transition:opacity 0.35s ease;
+      z-index:100; min-width:620px; -webkit-user-select:none; user-select:none; opacity:0; pointer-events:none;
+    }
+    #hud.active { opacity:1; pointer-events:auto; }
+    button { background:#111; border:1px solid #333; color:#00ffaa; padding:6px 10px; margin:0 2px; font-size:15px; cursor:pointer; transition:all 0.2s; }
+    button:hover { background:#1a1a1a; border-color:#00ffaa; color:#fff; }
+    select { background:#111; border:1px solid #333; color:#00ffaa; padding:5px 8px; font-size:13px; }
+    input[type="range"] { accent-color:#00ffaa; background:#222; height:4px; border-radius:2px; }
+    input[type="range"]#volume { width:90px; }
+    input[type="range"]#timeline { flex:1; }
+    .controls { display:flex; align-items:center; gap:6px; }
+    #trackInfo { margin-left:12px; flex:1; min-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:13px; }
+    #trackDl {
+      flex-shrink:0; min-width:36px; padding:6px 8px; font-size:15px; font-weight:600;
+      color:#ffea00; border-color:#333;
+    }
+    #trackDl:hover { border-color:#ffea00; color:#fff; background:rgba(255,234,0,0.14); }
+    #trackDl:disabled { opacity:0.35; cursor:default; }
+    .range-controls { margin-top:8px; display:flex; align-items:center; gap:12px; }
+    #playlist { display:none; }
+    #audioBtn { min-width:72px; }
+    #trackInfo { cursor:pointer; }
+    #audioDrawer {
+      position:fixed; left:0; right:0; bottom:0; max-height:58vh;
+      background:rgba(8,8,8,0.96); border-top:1px solid #333;
+      color:#00ffaa; box-shadow:0 -8px 24px rgba(0,0,0,0.6);
+      transform:translateY(100%); transition:transform 0.35s ease;
+      z-index:200; overflow-y:auto; padding:14px 18px 28px;
+      -webkit-user-select:none; user-select:none;
+    }
+    #audioDrawer.open { transform:translateY(0); }
+    #audioDrawer h2 {
+      margin:0 0 10px; font-size:15px; font-weight:600; color:#00ffaa;
+      border-bottom:1px solid #222; padding-bottom:8px;
+    }
+    .tree-folder {
+      margin:6px 0 2px; font-size:13px; font-weight:600; color:#00ffaa;
+    }
+    .tree-folder .tree-folder { font-weight:500; color:#7dffc8; }
+    .tree-row {
+      display:flex; align-items:stretch; gap:4px; margin:2px 0;
+    }
+    .tree-file {
+      flex:1; display:block; text-align:left; padding:7px 10px;
+      background:transparent; border:1px solid transparent; border-radius:3px;
+      color:#bbb; font-size:13px; cursor:pointer;
+    }
+    .tree-file:hover { color:#fff; border-color:#333; background:rgba(0,255,170,0.06); }
+    .tree-file.active { color:#00ffaa; border-color:#00ffaa; background:rgba(0,255,170,0.1); }
+    .tree-dl {
+      flex-shrink:0; min-width:36px; padding:7px 8px; font-size:15px; font-weight:600;
+      color:#ffea00; border-color:#333;
+    }
+    .tree-dl:hover { border-color:#ffea00; color:#fff; background:rgba(255,234,0,0.14); }
+    #audioDrawer .dl-hint {
+      margin:0 0 12px; font-size:12px; color:#ffea00;
+      text-decoration:underline; text-decoration-color:#ffea00; text-underline-offset:3px;
+    }
+    .tree-indent-0 { padding-left:0; }
+    .tree-indent-1 { padding-left:14px; }
+    .tree-indent-2 { padding-left:28px; }
+    .tree-indent-3 { padding-left:42px; }
+    .tree-indent-4 { padding-left:56px; }
+    /* Device-aware: phone / tablet / coarse pointer */
+    @media (max-width:680px), (pointer: coarse) {
+      #hud {
+        min-width:unset; left:8px; right:8px; bottom: max(8px, env(safe-area-inset-bottom));
+        padding:10px 12px; font-size:14px;
+      }
+      .controls { flex-wrap:wrap; gap:8px; }
+      .controls button {
+        min-height:44px; min-width:44px; padding:10px 12px; font-size:16px;
+      }
+      #trackInfo { min-width:0; flex:1 1 100%; order:10; margin-left:0; font-size:14px; }
+      #trackDl { min-height:44px; min-width:44px; }
+      #load { display:none; } /* folder browse is desktop-ish; library is Audio drawer */
+      .range-controls { gap:10px; margin-top:10px; }
+      input[type="range"]#volume { width:72px; height:28px; }
+      input[type="range"]#timeline { min-height:28px; }
+      #audioDrawer { max-height:70vh; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
+      .tree-file, .tree-dl { min-height:44px; font-size:15px; }
+    }
+    html.device-phone #hud, html.device-tablet #hud {
+      min-width:unset; left:8px; right:8px;
+    }
+    html.input-touch button:active { transform:scale(0.97); }
+  </style>
+</head>
+<body oncontextmenu="return false;">
+
+  <canvas id="viz" aria-hidden="true"></canvas>
+
+  <div id="hud">
+    <div class="controls">
+      <button id="prev">⏮</button>
+      <button id="play">▶</button>
+      <button id="next">⏭</button>
+      <button id="shuffle">🔀</button>
+      <button id="load">Browse Folder</button>
+      <button id="audioBtn" type="button" aria-expanded="false" aria-controls="audioDrawer">Audio</button>
+      <select id="playlist" aria-label="Playlist"></select>
+      <div id="trackInfo" title="Open Audio library">No track loaded</div>
+      <button id="trackDl" type="button" title="Download current track to your device" aria-label="Download current track" disabled>*</button>
+    </div>
+    <div class="range-controls">
+      <input type="range" id="volume" min="0" max="1" step="0.01" value="1" aria-label="Volume">
+      <input type="range" id="timeline" min="0" max="100" value="0" aria-label="Progress">
+    </div>
+  </div>
+
+  <div id="audioDrawer" aria-label="Audio library" hidden>
+    <h2>Audio</h2>
+    <p class="dl-hint">click * to DL to your device</p>
+    <div id="audioTree"></div>
+  </div>
+
+  <audio id="audio"></audio>
+
+  <script>
+    var GitJukedPlaylist = {
+      normalizeManifest: function (data) {
+        var raw = data && (data.tracks || data);
+        if (!Array.isArray(raw)) return [];
+        return raw.map(function (t) {
+          return { name: t.title || t.name || '', src: t.file || t.src || '' };
+        }).filter(function (t) { return t.name && t.src; });
+      },
+      buildSelectOptions: function (tracks) {
+        return tracks.map(function (t, i) {
+          return { label: t.name, value: String(i) };
+        });
+      }
+    };
+
+    const audio = document.getElementById('audio');
+    const hud = document.getElementById('hud');
+    const prevBtn = document.getElementById('prev');
+    const playBtn = document.getElementById('play');
+    const nextBtn = document.getElementById('next');
+    const shuffleBtn = document.getElementById('shuffle');
+    const loadBtn = document.getElementById('load');
+    const playlistSelect = document.getElementById('playlist');
+    const trackInfo = document.getElementById('trackInfo');
+    const trackDl = document.getElementById('trackDl');
+    const audioBtn = document.getElementById('audioBtn');
+    const audioDrawer = document.getElementById('audioDrawer');
+    const audioTree = document.getElementById('audioTree');
+    const volumeSlider = document.getElementById('volume');
+    const timelineSlider = document.getElementById('timeline');
+
+    let audioCtx = null;
+    let analyser = null;
+    let freqData = null;
+    let audioGraphReady = false;
+
+    function ensureAudio() {
+      if (!audioGraphReady) {
+        audioCtx = new AudioContext();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        audioCtx.createMediaElementSource(audio).connect(analyser).connect(audioCtx.destination);
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+        audioGraphReady = true;
+      }
+      return audioCtx.resume();
+    }
+
+    let playlist = [];
+    let currentIndex = 0;
+    let isPlaying = false;
+    let hideTimer = null;
+    let currentObjectURL = null;
+    const HIDE_DELAY = 2200;
+    const IS_HOSTED = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    const AUDIO_EXT = /\.(mp3|wav|ogg|oga|opus|m4a|m4b|aac|flac|wma|aiff|aif|webm|weba|mid|midi|amr|3gp|ac3|mka|caf|wv|ape)$/i;
+
+    function revokeCurrentURL() {
+      if (currentObjectURL) {
+        URL.revokeObjectURL(currentObjectURL);
+        currentObjectURL = null;
+      }
+    }
+
+    function showHUD() {
+      clearTimeout(hideTimer);
+      hud.classList.add('active');
+      hideTimer = setTimeout(function () { hud.classList.remove('active'); }, HIDE_DELAY);
+    }
+
+    async function loadStaticPlaylist() {
+      const res = await fetch('tracks.json', { cache: 'no-store' });
+      if (!res.ok) throw new Error('tracks.json missing');
+      const data = await res.json();
+      return GitJukedPlaylist.normalizeManifest(data);
+    }
+
+    function formatFolderLabel(part) {
+      return part.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    }
+
+    function buildAudioTree(tracks) {
+      var root = { name: 'Audio', children: {}, files: [] };
+      tracks.forEach(function (track, index) {
+        var rel = track.src.replace(/^audio\//i, '');
+        var parts = rel.split('/');
+        var filePart = parts.pop();
+        var node = root;
+        parts.forEach(function (part) {
+          if (!node.children[part]) {
+            node.children[part] = { name: formatFolderLabel(part), children: {}, files: [] };
+          }
+          node = node.children[part];
+        });
+        node.files.push({ name: track.name, index: index, file: filePart, src: track.src });
+      });
+      return root;
+    }
+
+    function downloadFilename(track) {
+      if (track.src) {
+        var parts = track.src.split('/');
+        return parts[parts.length - 1] || track.name;
+      }
+      if (track.file && track.file.name) return track.file.name;
+      return (track.name || 'track').replace(/[^\w.\- ]+/g, '_') + '.audio';
+    }
+
+    function triggerFileDownload(url, filename) {
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function downloadTrack(index) {
+      var track = playlist[index];
+      if (!track) return;
+
+      if (track.src) {
+        triggerFileDownload(track.src, downloadFilename(track));
+        return;
+      }
+
+      if (track.handle) {
+        track.handle.getFile().then(function (file) {
+          var url = URL.createObjectURL(file);
+          triggerFileDownload(url, file.name);
+          setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        }).catch(function (err) { console.warn('Download failed:', err); });
+        return;
+      }
+
+      if (track.file) {
+        var blobUrl = URL.createObjectURL(track.file);
+        triggerFileDownload(blobUrl, downloadFilename(track));
+        setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 1000);
+      }
+    }
+
+    function renderAudioTreeNode(node, depth) {
+      var frag = document.createDocumentFragment();
+      var folderKeys = Object.keys(node.children).sort();
+      folderKeys.forEach(function (key) {
+        var child = node.children[key];
+        var folderEl = document.createElement('div');
+        folderEl.className = 'tree-folder tree-indent-' + Math.min(depth, 4);
+        folderEl.textContent = (depth > 0 ? '› ' : '') + child.name;
+        frag.appendChild(folderEl);
+        frag.appendChild(renderAudioTreeNode(child, depth + 1));
+      });
+      node.files.sort(function (a, b) { return a.name.localeCompare(b.name); });
+      node.files.forEach(function (file) {
+        var row = document.createElement('div');
+        row.className = 'tree-row tree-indent-' + Math.min(depth, 4);
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tree-file' + (file.index === currentIndex ? ' active' : '');
+        btn.textContent = file.name;
+        btn.dataset.index = String(file.index);
+        btn.onclick = function () {
+          loadTrack(file.index);
+          closeAudioDrawer();
+          showHUD();
+        };
+
+        var dlBtn = document.createElement('button');
+        dlBtn.type = 'button';
+        dlBtn.className = 'tree-dl';
+        dlBtn.textContent = '*';
+        dlBtn.title = 'Download to your device';
+        dlBtn.setAttribute('aria-label', 'Download ' + file.name);
+        dlBtn.onclick = function (e) {
+          e.stopPropagation();
+          downloadTrack(file.index);
+        };
+
+        row.appendChild(btn);
+        row.appendChild(dlBtn);
+        frag.appendChild(row);
+      });
+      return frag;
+    }
+
+    function renderAudioTree(tracks) {
+      audioTree.innerHTML = '';
+      if (!tracks.length) {
+        audioTree.textContent = 'No audio files in library.';
+        return;
+      }
+      var tree = buildAudioTree(tracks);
+      audioTree.appendChild(renderAudioTreeNode(tree, 0));
+    }
+
+    function openAudioDrawer() {
+      renderAudioTree(playlist);
+      audioDrawer.hidden = false;
+      requestAnimationFrame(function () { audioDrawer.classList.add('open'); });
+      audioBtn.setAttribute('aria-expanded', 'true');
+      showHUD();
+    }
+
+    function closeAudioDrawer() {
+      audioDrawer.classList.remove('open');
+      audioBtn.setAttribute('aria-expanded', 'false');
+      setTimeout(function () {
+        if (!audioDrawer.classList.contains('open')) audioDrawer.hidden = true;
+      }, 360);
+    }
+
+    function toggleAudioDrawer() {
+      if (audioDrawer.classList.contains('open')) closeAudioDrawer();
+      else openAudioDrawer();
+    }
+
+    function populatePlaylist(tracks) {
+      playlist = tracks;
+      playlistSelect.innerHTML = '';
+      GitJukedPlaylist.buildSelectOptions(tracks).forEach(function (opt) {
+        playlistSelect.appendChild(new Option(opt.label, opt.value));
+      });
+      renderAudioTree(tracks);
+      if (tracks.length) {
+        currentIndex = 0;
+        loadTrack(0);
+        showHUD();
+      } else {
+        updateTrackDlState();
+      }
+    }
+
+    async function initHosted() {
+      try {
+        const tracks = await loadStaticPlaylist();
+        populatePlaylist(tracks);
+        trackInfo.textContent = tracks.length ? 'GitJuked · ' + tracks.length + ' track(s) · tap Audio' : 'No tracks in manifest';
+      } catch (e) {
+        trackInfo.textContent = 'Hosted mode — add tracks.json + audio/';
+        console.warn(e);
+      }
+    }
+
+    function updateTrackDlState() {
+      trackDl.disabled = !playlist.length || !playlist[currentIndex];
+    }
+
+    function loadTrack(index) {
+      if (!playlist[index]) return;
+      const track = playlist[index];
+      currentIndex = index;
+      trackInfo.textContent = 'Now playing: ' + track.name;
+      updateTrackDlState();
+      playlistSelect.value = index;
+      if (audioDrawer.classList.contains('open')) renderAudioTree(playlist);
+
+      revokeCurrentURL();
+
+      if (track.src) {
+        audio.src = track.src;
+        audio.load();
+        if (isPlaying) {
+          ensureAudio().then(function () { audio.play().catch(function () {}); });
+        }
+        return;
+      }
+
+      if (track.handle) {
+        track.handle.getFile().then(function (file) {
+          currentObjectURL = URL.createObjectURL(file);
+          audio.src = currentObjectURL;
+          audio.load();
+          if (isPlaying) {
+            ensureAudio().then(function () { audio.play().catch(function () {}); });
+          }
+        });
+      } else if (track.file) {
+        currentObjectURL = URL.createObjectURL(track.file);
+        audio.src = currentObjectURL;
+        audio.load();
+        if (isPlaying) {
+          ensureAudio().then(function () { audio.play().catch(function () {}); });
+        }
+      }
+    }
+
+    async function loadFolder() {
+      if (!window.showDirectoryPicker) {
+        trackInfo.textContent = 'Browse Folder works locally — use playlist above on the live site';
+        showHUD();
+        return;
+      }
+      try {
+        await ensureAudio();
+        const dirHandle = await window.showDirectoryPicker();
+        playlist = [];
+        playlistSelect.innerHTML = '';
+        let count = 1;
+        for await (const entry of dirHandle.entries()) {
+          const name = entry[0];
+          const handle = entry[1];
+          if (handle.kind === 'file' && AUDIO_EXT.test(name)) {
+            playlistSelect.appendChild(new Option('Track ' + count, playlist.length));
+            playlist.push({ name: 'Track ' + count, handle: handle });
+            count++;
+          }
+        }
+        if (playlist.length > 0) {
+          renderAudioTree(playlist);
+          currentIndex = 0;
+          loadTrack(0);
+          showHUD();
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          trackInfo.textContent = 'Folder picker unavailable in this browser';
+          showHUD();
+        }
+      }
+    }
+
+    loadBtn.onclick = loadFolder;
+    if (IS_HOSTED) loadBtn.style.display = 'none';
+
+    audioBtn.onclick = function () { toggleAudioDrawer(); };
+    trackInfo.onclick = function () { openAudioDrawer(); };
+    trackDl.onclick = function () {
+      if (!trackDl.disabled) downloadTrack(currentIndex);
+      showHUD();
+    };
+
+    playBtn.onclick = async function () {
+      await ensureAudio();
+      if (isPlaying) {
+        audio.pause();
+        playBtn.textContent = '▶';
+      } else {
+        try {
+          await audio.play();
+          playBtn.textContent = '⏸';
+        } catch (err) {
+          console.error('Audio play failed:', err);
+        }
+      }
+      isPlaying = !isPlaying;
+      showHUD();
+    };
+
+    prevBtn.onclick = function () {
+      currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+      loadTrack(currentIndex);
+      showHUD();
+    };
+    nextBtn.onclick = function () {
+      currentIndex = (currentIndex + 1) % playlist.length;
+      loadTrack(currentIndex);
+      showHUD();
+    };
+
+    shuffleBtn.onclick = function () {
+      if (playlist.length < 2) return;
+      for (let i = playlist.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = playlist[i];
+        playlist[i] = playlist[j];
+        playlist[j] = tmp;
+      }
+      playlistSelect.innerHTML = '';
+      playlist.forEach(function (t, i) {
+        playlistSelect.appendChild(new Option(t.name, i));
+      });
+      renderAudioTree(playlist);
+      currentIndex = 0;
+      loadTrack(0);
+      showHUD();
+    };
+
+    playlistSelect.onchange = function (e) {
+      currentIndex = +e.target.value;
+      loadTrack(currentIndex);
+      showHUD();
+    };
+
+    audio.onended = function () { nextBtn.click(); };
+    volumeSlider.oninput = function () { audio.volume = volumeSlider.value; };
+    audio.ontimeupdate = function () {
+      if (audio.duration) timelineSlider.value = (audio.currentTime / audio.duration) * 100;
+    };
+    timelineSlider.oninput = function () {
+      if (audio.duration) audio.currentTime = (timelineSlider.value / 100) * audio.duration;
+    };
+
+    function resetActivity() { showHUD(); }
+    document.addEventListener('mousemove', resetActivity);
+    document.addEventListener('click', function (e) {
+      resetActivity();
+      ensureAudio().catch(function () {});
+      if (audioDrawer.classList.contains('open') &&
+          !audioDrawer.contains(e.target) && e.target !== audioBtn && e.target !== trackInfo) {
+        closeAudioDrawer();
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      resetActivity();
+      if (e.code === 'Space') { e.preventDefault(); playBtn.click(); }
+      else if (e.code === 'ArrowRight') nextBtn.click();
+      else if (e.code === 'ArrowLeft') prevBtn.click();
+      else if (e.code === 'KeyS') shuffleBtn.click();
+      else if (e.code === 'KeyA') toggleAudioDrawer();
+      else if (e.code === 'Escape') closeAudioDrawer();
+    });
+
+    window.addEventListener('beforeunload', revokeCurrentURL);
+
+    const viz = document.getElementById('viz');
+    const vizCtx = viz.getContext('2d');
+
+    function resizeViz() {
+      viz.width = innerWidth;
+      viz.height = innerHeight;
+    }
+    addEventListener('resize', resizeViz);
+    resizeViz();
+
+    function drawViz() {
+      requestAnimationFrame(drawViz);
+      const w = viz.width;
+      const h = viz.height;
+      vizCtx.fillStyle = 'rgba(0,0,0,0.15)';
+      vizCtx.fillRect(0, 0, w, h);
+      if (!analyser || !freqData) return;
+      analyser.getByteFrequencyData(freqData);
+      const barW = w / freqData.length;
+      for (let i = 0; i < freqData.length; i++) {
+        const barH = Math.max(1, (freqData[i] / 255) * h * 0.45);
+        vizCtx.fillStyle = 'rgba(0,255,170,' + (0.2 + freqData[i] / 512) + ')';
+        vizCtx.fillRect(i * barW, h - barH, barW - 1, barH);
+      }
+    }
+    drawViz();
+
+    audio.volume = 1;
+    showHUD();
+    if (IS_HOSTED) initHosted();
+  </script>
+</body>
+</html>

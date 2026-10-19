@@ -1,0 +1,18 @@
+docs/
+scripts/
+!scripts/sanitize-timezones.sh
+!scripts/sanitize-timezones.ps1
+tests/
+pics/
+mcps/
+terminals/
+
+# OS / tooling
+.DS_Store
+Thumbs.db
+*.log
+package.json
+package-lock.json
+node_modules/
+page.png
+page-run2.png
